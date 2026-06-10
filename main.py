@@ -10,15 +10,13 @@ def home():
 
 @app.get("/command")
 def get_command():
-    return{"command": latest_command}
+    global latest_command
+    cmd = latest_command
+    latest_command = "S"
+    return {"command": cmd}
 
 @app.get("/command/{cmd}")
 def set_command(cmd: str):
     global latest_command
     latest_command = cmd.upper()
     return {"status": "oks", "command": latest_command}
-
-@app.get("/command)
-         def get_command():
-         global latest_command
-         return {"command": latest_command}
