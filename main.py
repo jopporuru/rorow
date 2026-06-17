@@ -17,7 +17,9 @@ clients = []
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    print("WS ROUTE HIT")
     await websocket.accept()
+    print("WS ACCEPTED")
     clients.append(websocket)
 
     global latest_command
