@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -12,20 +12,28 @@ app.add_middleware(
 )
 
 latest_command = "S"
+clients = []
 
-@app.get("/")
-def home():
-    return{"status": "shits on"}
 
-@app.get("/command")
-def get_command():
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    clients.append(websocket)
+
     global latest_command
-    cmd = latest_command
-    latest_command = "S"
-    return {"command": cmd}
 
-@app.get("/command/{cmd}")
-def set_command(cmd: str):
-    global latest_command
-    latest_command = cmd.upper()
-    return {"status": "oks", "command": latest_command}
+    try:
+        while True:
+            data = await websocket.receive_text()
+
+            latest_command = data.upper()
+
+            print("Received:", data)
+            print("Broadcasting:", latest_command)
+
+            for client in clients:
+                await client.send_text(latest_command)
+
+    except:
+        if websocket in clients:
+            clients.remove(websocket)
